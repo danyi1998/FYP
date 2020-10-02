@@ -51,6 +51,8 @@ metadata$lithium <- gsub("non-user=0, user = 1", "", metadata$lithium)
 metadata$lithium <- gsub("[ ():]", "", metadata$lithium)
 metadata$tobacco <- gsub("tobacco use: ", "", metadata$tobacco)
 
+metadata_retain_faulty_samples <- metadata
+
 metadata <- metadata[!(row.names(metadata) %in% c("X12R1998", "X13R1190")), ]
 standardised_pc_transcriptomic_df_2_extracolumns <- standardised_pc_transcriptomic_df_2_extracolumns[!(row.names(standardised_pc_transcriptomic_df_2_extracolumns) %in% c("X12R1998.counts", "X13R1190.counts")), ]
 
@@ -76,3 +78,12 @@ cluster_tobacco <- aggregate(standardised_pc_transcriptomic_df_2_extracolumns, b
 cluster_tobacco <- cluster_tobacco[, 1:3]
 colnames(cluster_tobacco) <- c("cluster","tobacco", "count")
 cluster_tobacco_plot <- plot(cluster_tobacco$cluster, cluster_tobacco$count, type="p", xlab="cluster", ylab="count", main="Cluster-Tobacco" , col=ifelse(cluster_tobacco$tobacco=="1",'red','blue'))
+
+
+
+transcriptomic_genes_with_cluster_allocation <- cbind(transcriptomic_df, cluster_allocation)
+sample_status_retain_faulty_samples <- metadata_retain_faulty_samples[, 1]
+sample_status_retain_faulty_samples <- as.data.frame(sample_status_retain_faulty_samples)
+transcriptomic_genes_with_cluster_allocation_and_status <- cbind(transcriptomic_genes_with_cluster_allocation, sample_status_retain_faulty_samples)
+transcriptomic_genes_with_cluster_allocation_and_status_no_controls <- transcriptomic_genes_with_cluster_allocation_and_status[transcriptomic_genes_with_cluster_allocation_and_status$sample_status_retain_faulty_samples != "Control", ]
+high_loading_gene <- transcriptomic_genes_with_cluster_allocation_and_status_no_controls[, c("ENSG00000121390.13", "cluster_allocation")]
