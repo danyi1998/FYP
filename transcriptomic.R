@@ -86,4 +86,11 @@ sample_status_retain_faulty_samples <- metadata_retain_faulty_samples[, 1]
 sample_status_retain_faulty_samples <- as.data.frame(sample_status_retain_faulty_samples)
 transcriptomic_genes_with_cluster_allocation_and_status <- cbind(transcriptomic_genes_with_cluster_allocation, sample_status_retain_faulty_samples)
 transcriptomic_genes_with_cluster_allocation_and_status_no_controls <- transcriptomic_genes_with_cluster_allocation_and_status[transcriptomic_genes_with_cluster_allocation_and_status$sample_status_retain_faulty_samples != "Control", ]
-high_loading_gene <- transcriptomic_genes_with_cluster_allocation_and_status_no_controls[, c("ENSG00000121390.13", "cluster_allocation")]
+high_loading_gene <- transcriptomic_genes_with_cluster_allocation_and_status_no_controls[, c("ENSG00000166473.12", "cluster_allocation")]
+
+
+# investigating correlation between gene and clinical data, put on hold for now, check again when using in the future 
+metadata_retain_faulty_samples_no_controls <- metadata_retain_faulty_samples[metadata_retain_faulty_samples$status != "Control", ]
+metadata_retain_faulty_samples_no_controls$age <- as.numeric(metadata_retain_faulty_samples_no_controls$age)
+metadata_retain_faulty_samples_no_controls$lithium <- as.numeric(metadata_retain_faulty_samples_no_controls$lithium)
+corr_results <- cor(x=high_loading_gene$ENSG00000121390.13, y=metadata_retain_faulty_samples_no_controls$lithium, use="all.obs", method="pearson")
