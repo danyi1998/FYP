@@ -1,8 +1,37 @@
+library("DESeq2")
+
 options(max.print=1000000)
 
 transcriptomic_df <- read.table("C:/Users/65834/Documents/FYP/GSE124326_transciptomic.txt", header=TRUE, row.names="gene")
 transcriptomic_df <- t(transcriptomic_df)
+vst_input <- transcriptomic_df 
+vst_input <- t(vst_input)
 transcriptomic_df <- as.data.frame(transcriptomic_df)
+
+# remove faulty samples as in GSE124326_BD1 page 2
+vst_result <- varianceStabilizingTransformation(vst_input, blind = TRUE)
+vst_result <- t(vst_result)
+variances <- apply(X=vst_result, MARGIN=2, FUN=var)
+sorted_variances <- sort(variances, decreasing=TRUE, index.return=TRUE)$ix[1:500] 
+genes_with_top500_variances <- vst_result[, sorted_variances]
+pca_result <- prcomp(genes_with_top500_variances, center = TRUE, scale. = TRUE)
+pca_result <- pca_result$x
+pca_result <- as.data.frame(pca_result)
+pc1 <- pca_result[,1]
+meta_data <- read.table("C:/Users/65834/Documents/FYP/GSE124326_metadata.txt", header=TRUE, row.names=1)
+meta_data <- t(meta_data)
+meta_data <- as.data.frame(meta_data)
+pc1_and_metadata <- cbind(pc1, meta_data)
+pc1_and_metadata_controls_only <- pc1_and_metadata[pc1_and_metadata$status == "bipolar disorder diagnosis: Control", ]
+pc1_and_metadata_controls_only <- pc1_and_metadata_controls_only[!(row.names(pc1_and_metadata_controls_only) %in% c("X12R1998", "X13R1190")), ]
+
+transcriptomic_df <- transcriptomic_df[!(row.names(transcriptomic_df) %in% c("X12R1998.counts", "X13R1190.counts", "X108773A.counts")), ]
+metadata <- read.table("C:/Users/65834/Documents/FYP/GSE124326_metadata.txt", header=TRUE, row.names=1)
+metadata <- t(metadata)
+metadata <- as.data.frame(metadata) 
+metadata <- metadata[!(row.names(metadata) %in% c("X12R1998", "X13R1190", "X108773A")), ]
+
+
 
 transcriptomic_df <- transcriptomic_df[vapply(transcriptomic_df, function(x) length(unique(x)) > 1, logical(1L))] 
 transcriptomic_df <- scale(transcriptomic_df)
@@ -41,10 +70,6 @@ cluster_allocation <- data.frame(cluster_allocation)
 standardised_pc_transcriptomic_df_133_extracolumns <- cbind(standardised_pc_transcriptomic_df_133, cluster_allocation)
 
 
-
-metadata <- read.table("C:/Users/65834/Documents/FYP/GSE124326_metadata.txt", header=TRUE, row.names=1)
-metadata <- t(metadata)
-metadata <- as.data.frame(metadata)
 
 metadata$status <- gsub("bipolar disorder diagnosis: ", "", metadata$status)
 metadata$age <- gsub("age: ", "", metadata$age)
