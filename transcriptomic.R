@@ -62,7 +62,7 @@ fviz_nbclust(standardised_pc_transcriptomic_df_133, kmeans, iter.max = 30, nstar
 set.seed(123)
 kmeans_result <- kmeans(standardised_pc_transcriptomic_df_133, 5, nstart = 25)
 
-fviz_cluster(kmeans_result, data = standardised_pc_transcriptomic_df_133[, 1:133])
+fviz_cluster(kmeans_result, data = standardised_pc_transcriptomic_df_133[, 1:133], choose.vars=c("PC1", "PC2"))
 
 cluster_allocation <- kmeans_result$cluster 
 cluster_allocation <- data.frame(cluster_allocation)
