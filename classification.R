@@ -14,12 +14,14 @@ metadata <- as.data.frame(metadata)
 metadata <- metadata[!(row.names(metadata) %in% c("X12R1998", "X13R1190", "X108773A")), ]
 
 transcriptomic_df <- transcriptomic_df[vapply(transcriptomic_df, function(x) length(unique(x)) > 1, logical(1L))] 
-transcriptomic_df <- scale(transcriptomic_df)
-transcriptomic_df <- as.data.frame(transcriptomic_df)
 
 variances <- apply(X=transcriptomic_df, MARGIN=2, FUN=var)
 sorted_variances <- sort(variances, decreasing=TRUE, index.return=TRUE)$ix[1:10000] 
 bottom_variance_genes <- sort(variances, decreasing=FALSE, index.return=TRUE)$ix[1:2000] 
+
+transcriptomic_df <- scale(transcriptomic_df)
+transcriptomic_df <- as.data.frame(transcriptomic_df)
+
 genes_with_highest_variances <- transcriptomic_df[, sorted_variances]
 genes_with_lowest_variances <- transcriptomic_df[, bottom_variance_genes]
 genes_with_selected_variances <- cbind(genes_with_highest_variances, genes_with_lowest_variances)
