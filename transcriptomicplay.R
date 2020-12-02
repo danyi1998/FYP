@@ -47,21 +47,72 @@ transcriptomic_df <- as.data.frame(transcriptomic_df)
 transcriptomic_df <- transcriptomic_df[,row.names(variances)]
 
 
-principal_comps <- prcomp(transcriptomic_df, center = TRUE, scale. = TRUE) 
+
+
+# for 3k+ genes
+reduced_transcriptomic_df <- read.csv(file="C:/Users/65834/Documents/FYP/gene_afterFtest.csv", header=TRUE, sep=",", row.names="samples") 
+reduced_transcriptomic_df <- reduced_transcriptomic_df[!(row.names(reduced_transcriptomic_df) %in% c("X12R1998.counts", "X13R1190.counts", "X108773A.counts")), ]
+
+metadata <- read.table("C:/Users/65834/Documents/FYP/GSE124326_metadata.txt", header=TRUE, row.names=1)
+metadata <- t(metadata)
+metadata <- as.data.frame(metadata) 
+metadata <- metadata[!(row.names(metadata) %in% c("X12R1998", "X13R1190", "X108773A")), ]
+
+reduced_transcriptomic_df <- reduced_transcriptomic_df[vapply(reduced_transcriptomic_df, function(x) length(unique(x)) > 1, logical(1L))] 
+
+reduced_transcriptomic_df <- scale(reduced_transcriptomic_df)
+reduced_transcriptomic_df <- as.data.frame(reduced_transcriptomic_df)
+
+
+
+
+
+principal_comps <- prcomp(reduced_transcriptomic_df, center = FALSE, scale. = FALSE) 
 
 summary(principal_comps)
 
 gene_loadings <- principal_comps$rotation
 gene_loadings <- gene_loadings[, 1:133]
 
-pc_transcriptomic_df <- principal_comps$x
-pc_transcriptomic_df <- as.data.frame(pc_transcriptomic_df)
+standardised_pc_transcriptomic_df_133 <- principal_comps$x
+standardised_pc_transcriptomic_df_133 <- as.data.frame(pc_transcriptomic_df)
 
-pc_transcriptomic_df_133 <- pc_transcriptomic_df[,1:133] 
+standardised_pc_transcriptomic_df_133 <- pc_transcriptomic_df[,1:113] 
 
-standardised_pc_transcriptomic_df_133 <- scale(pc_transcriptomic_df_133)
-standardised_pc_transcriptomic_df_133 <- as.data.frame(standardised_pc_transcriptomic_df_133)
+#standardised_pc_transcriptomic_df_133 <- scale(pc_transcriptomic_df_133)
+#standardised_pc_transcriptomic_df_133 <- as.data.frame(standardised_pc_transcriptomic_df_133) 
 
+standardised_pc_transcriptomic_df_133 <- cbind(metadata$status, standardised_pc_transcriptomic_df_133)
+colnames(standardised_pc_transcriptomic_df_133)[1] <- "status"
+
+standardised_pc_transcriptomic_df_133 <- standardised_pc_transcriptomic_df_133[standardised_pc_transcriptomic_df_133$status != "bipolar disorder diagnosis: Control", ]
+
+standardised_pc_transcriptomic_df_133 <- standardised_pc_transcriptomic_df_133[,-1]
+
+
+# hierarchical clustering
+fviz_nbclust(standardised_pc_transcriptomic_df_133, kmeans, method = "wss", k.max=20)
+
+fviz_nbclust(standardised_pc_transcriptomic_df_133, kmeans, method = "silhouette", k.max=20)
+
+distance <- dist(standardised_pc_transcriptomic_df_133)
+
+hc <- hclust(distance, method = "complete")
+
+plot(hc, labels = FALSE)
+
+rect.hclust(hc, k=6)
+
+cluster_groups <- cutree(hc, k=2)
+
+hclust_allocation <- cbind(standardised_pc_transcriptomic_df_133, cluster_groups)
+
+cluster_groups <- as.data.frame(cluster_groups)
+
+
+
+
+# k means 
 library(factoextra)
 library(cluster)
 
@@ -71,9 +122,9 @@ set.seed(123)
 fviz_nbclust(standardised_pc_transcriptomic_df_133, kmeans, iter.max = 30, nstart = 25, method = "silhouette", k.max=20)
 
 set.seed(123)
-kmeans_result <- kmeans(standardised_pc_transcriptomic_df_133, 8, nstart = 25)
+kmeans_result <- kmeans(standardised_pc_transcriptomic_df_133, 3, nstart = 25)
 
-fviz_cluster(kmeans_result, data = standardised_pc_transcriptomic_df_133[, 1:133], choose.vars=c("PC1", "PC2"))
+fviz_cluster(kmeans_result, data = standardised_pc_transcriptomic_df_133[, 1:113], choose.vars=c("PC1", "PC2"))
 
 cluster_allocation <- kmeans_result$cluster 
 cluster_allocation <- data.frame(cluster_allocation)
