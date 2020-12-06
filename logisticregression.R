@@ -85,23 +85,3 @@ print(model)
 
 
 
-
-
-
-
-
-
-reduced_transcriptomic_df$status <- as.factor(reduced_transcriptomic_df$status) 
-
-s <- sample(nrow(reduced_transcriptomic_df), nrow(reduced_transcriptomic_df)*0.8)
-training_set <- reduced_transcriptomic_df[s,]
-testing_set <- reduced_transcriptomic_df[-s,]
-
-model <- glm(status~., training_set, family="binomial", maxit=100)
-
-res <- predict(model, testing_set[,-1], type="response")
-
-table(actual=testing_set$status, predicted=res>0.1)
-
-
-
