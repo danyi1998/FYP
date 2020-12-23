@@ -20,7 +20,7 @@ reduced_transcriptomic_df <- reduced_transcriptomic_df[!(row.names(reduced_trans
 principal_comps <- prcomp(reduced_transcriptomic_df, center = FALSE, scale. = FALSE) 
 
 standardised_pc_transcriptomic_df_133 <- principal_comps$x
-standardised_pc_transcriptomic_df_133 <- standardised_pc_transcriptomic_df_133[,1:115] 
+standardised_pc_transcriptomic_df_133 <- standardised_pc_transcriptomic_df_133[,1:31] 
 
 metadata <- as.data.frame(metadata)
 standardised_pc_transcriptomic_df_133 <- as.data.frame(standardised_pc_transcriptomic_df_133)

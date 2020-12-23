@@ -21,7 +21,7 @@ summary(principal_comps)
 
 standardised_pc_transcriptomic_df_133 <- principal_comps$x
 
-standardised_pc_transcriptomic_df_133 <- standardised_pc_transcriptomic_df_133[,1:115] 
+standardised_pc_transcriptomic_df_133 <- standardised_pc_transcriptomic_df_133[,1:31] 
 
 metadata <- as.data.frame(metadata)
 standardised_pc_transcriptomic_df_133 <- as.data.frame(standardised_pc_transcriptomic_df_133)
@@ -40,7 +40,7 @@ fviz_nbclust(standardised_pc_transcriptomic_df_133, kmeans, iter.max = 30, nstar
 
 kmeans_result <- kmeans(standardised_pc_transcriptomic_df_133, 3, nstart = 25)
 
-fviz_cluster(kmeans_result, data = standardised_pc_transcriptomic_df_133[, 1:115], choose.vars=c("PC1", "PC2"))
+fviz_cluster(kmeans_result, data = standardised_pc_transcriptomic_df_133[, 1:31], choose.vars=c("PC1", "PC2"))
 
 cluster_allocation <- kmeans_result$cluster 
 cluster_allocation <- data.frame(cluster_allocation)
