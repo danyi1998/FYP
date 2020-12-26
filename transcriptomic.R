@@ -45,3 +45,39 @@ fviz_cluster(kmeans_result, data = standardised_pc_transcriptomic_df_133[, 1:31]
 cluster_allocation <- kmeans_result$cluster 
 cluster_allocation <- data.frame(cluster_allocation)
 
+
+
+
+
+
+# relationship with clinical data
+
+metadata_patients_only <- metadata[metadata$status != "bipolar disorder diagnosis: Control", ]
+
+metadata_with_cluster <- cbind(cluster_allocation, metadata_patients_only)
+
+
+metadata_with_cluster$age <- gsub("age: ", "", metadata_with_cluster$age)
+metadata_with_cluster$age <- as.numeric(metadata_with_cluster$age)
+cluster_age <- plot(metadata_with_cluster$cluster_allocation, metadata_with_cluster$age, type="p", xlab="cluster", ylab="age", xlim=c(0,5))
+
+
+cluster_sex <- aggregate(metadata_with_cluster, by=list(metadata_with_cluster$cluster_allocation, metadata_with_cluster$sex), FUN=length)
+cluster_sex <- cluster_sex[, 1:3]
+colnames(cluster_sex) <- c("cluster","sex", "count")
+cluster_sex_plot <- plot(cluster_sex$cluster, cluster_sex$count, type="p", xlab="cluster", ylab="count", main="Cluster-Sex" , col=ifelse(cluster_sex$sex=="Sex: F",'red','blue'), xlim=c(0,5))
+
+
+cluster_lithium <- aggregate(metadata_with_cluster, by=list(metadata_with_cluster$cluster_allocation, metadata_with_cluster$lithium), FUN=length)
+cluster_lithium <- cluster_lithium[, 1:3]
+colnames(cluster_lithium) <- c("cluster","lithium", "count")
+cluster_lithium_plot <- plot(cluster_lithium$cluster, cluster_lithium$count, type="p", xlab="cluster", ylab="count", main="Cluster-Lithium" , col=ifelse(cluster_lithium$lithium=="lithium use (non-user=0, user = 1): 1",'red','blue'), xlim=c(0,5))
+
+
+cluster_tobacco <- aggregate(metadata_with_cluster, by=list(metadata_with_cluster$cluster_allocation, metadata_with_cluster$tobacco), FUN=length)
+cluster_tobacco <- cluster_tobacco[, 1:3]
+colnames(cluster_tobacco) <- c("cluster","tobacco", "count")
+cluster_tobacco <- cluster_tobacco[cluster_tobacco$tobacco != "tobacco use: NA", ]
+cluster_tobacco_plot <- plot(cluster_tobacco$cluster, cluster_tobacco$count, type="p", xlab="cluster", ylab="count", main="Cluster-Tobacco" , col=ifelse(cluster_tobacco$tobacco=="tobacco use: 1",'red','blue'))
+
+
