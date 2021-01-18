@@ -1,4 +1,5 @@
 library(factoextra)
+library(caret)
 
 options(max.print=1000000)
 
@@ -6,8 +7,12 @@ reduced_transcriptomic_df <- read.csv(file="C:/Users/65834/Documents/FYP/gene_af
 
 reduced_transcriptomic_df <- scale(reduced_transcriptomic_df)
 
+reduced_trans_df_for_DA <- data.frame(reduced_transcriptomic_df)
+
 metadata <- read.table("C:/Users/65834/Documents/FYP/GSE124326_metadata.txt", header=TRUE, row.names=1)
 metadata <- t(metadata)
+
+metadata_for_DA <- data.frame(metadata)
 
 metadata <- metadata[!(row.names(metadata) %in% c("X12R1998", "X13R1190")), ]
 reduced_transcriptomic_df <- reduced_transcriptomic_df[!(row.names(reduced_transcriptomic_df) %in% c("X12R1998.counts", "X13R1190.counts")), ]
@@ -79,5 +84,34 @@ cluster_tobacco <- cluster_tobacco[, 1:3]
 colnames(cluster_tobacco) <- c("cluster","tobacco", "count")
 cluster_tobacco <- cluster_tobacco[cluster_tobacco$tobacco != "tobacco use: NA", ]
 cluster_tobacco_plot <- plot(cluster_tobacco$cluster, cluster_tobacco$count, type="p", xlab="cluster", ylab="count", main="Cluster-Tobacco" , col=ifelse(cluster_tobacco$tobacco=="tobacco use: 1",'red','blue'))
+
+
+
+
+
+
+
+
+# perform discriminant analysis
+
+reduced_trans_df_for_DA <- cbind(metadata_for_DA$status, reduced_trans_df_for_DA)
+colnames(reduced_trans_df_for_DA)[1] <- "status"
+
+reduced_trans_df_for_DA <- reduced_trans_df_for_DA[reduced_trans_df_for_DA$status != "bipolar disorder diagnosis: Control", ]
+
+reduced_trans_df_for_DA <- reduced_trans_df_for_DA[,-1]
+
+reduced_trans_df_for_DA <- cbind(cluster_allocation, reduced_trans_df_for_DA)
+
+
+
+reduced_trans_df_for_DA$cluster_allocation <- as.factor(reduced_trans_df_for_DA$cluster_allocation) 
+
+cross_validation <- trainControl(method = "cv", number = 5)
+
+model <- train(cluster_allocation~., data=reduced_trans_df_for_DA, method="svmLinear", trControl=cross_validation)
+
+print(model)
+
 
 
